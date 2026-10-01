@@ -1,55 +1,56 @@
+/* 外枠ラッパー: 画面幅100%・中央揃え・流し台(z-index:10)より手前に配置 */
 .conveyor-wrapper {
   position: relative;
   width: 100%;
   margin: 0;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 20;
 }
 
-/* コンベア本体アセンブリ */
+/* コンベア本体アセンブリ: 最大高さを201pxに固定 */
 .conveyor-assembly {
   position: relative;
   width: 100%;
+  height: 201px;
+  max-height: 201px;
   display: flex;
-  flex-direction: column;
-}
-
-/* 上部レール（コンクリート） */
-.conveyor-rail {
-  width: 100%;
-  box-sizing: border-box;
-  z-index: 5;
-}
-
-.conveyor-rail-top {
-  height: 18px;
-  background: #b8b5af;
-  border-top: 1.5px solid #eae7e1;
-}
-
-/* コンベアベルト面（スレートブルー） */
-.conveyor-track {
-  position: relative;
-  width: 100%;
-  height: 110px;
-  background: #486684;
-  display: flex;
+  justify-content: center;
   align-items: center;
 }
 
-/* 下部レール（コンクリート） */
-.conveyor-rail-bottom {
-  height: 18px;
-  background: #7d7a75;
+/* 3000pxイラスト画像のビューポート（画面中央揃え） */
+.conveyor-image-viewport {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3000px;
+  height: 201px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
 }
 
-/* ベルト上のアイテム描画領域 */
+/* ベルトコンベアイラスト（原寸比率維持・上部余白145pxをオフセット） */
+.conveyor-illustration {
+  width: 3000px;
+  height: 640px;
+  max-width: none;
+  margin-top: -145px;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ベルト面上のアイテム描画領域（上部レール47pxの下、ベルト面112pxに配置） */
 .conveyor-items-plane {
   position: absolute;
   left: 0;
   right: 0;
-  top: 0;
-  bottom: 0;
+  top: 47px;
+  height: 112px;
   pointer-events: auto;
+  z-index: 10;
 }
-

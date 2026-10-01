@@ -38,36 +38,37 @@ const GamePlayConveyor = ({ setHealth, setScore }: GamePlayConveyorProps) => {
   return (
     <div className="conveyor-wrapper">
       <div className="conveyor-assembly">
-        {/* 上部レール枠 */}
-        <div className="conveyor-rail conveyor-rail-top" />
-
-        {/* ベルト面 */}
-        <div className="conveyor-track">
-          <div className="conveyor-items-plane">
-            {conveyItems.map((conveyItem: ConveyItem) => {
-              const elapsedMs = Date.now() - conveyItem.startedAt;
-              const progress = Math.min(1, elapsedMs / conveyItem.travelMs);
-              const distanceX = conveyItem.toX - conveyItem.coordinateX;
-              const currentX = conveyItem.coordinateX + distanceX * progress;
-
-              return (
-                <GamePlayWaste
-                  key={conveyItem.id}
-                  id={conveyItem.id}
-                  label={conveyItem.def.label}
-                  isSimple={conveyItem.def.isSimple}
-                  parts={conveyItem.def.parts}
-                  baseX={currentX}
-                  baseY={conveyItem.coordinateY}
-                  setScore={setScore}
-                />
-              );
-            })}
-          </div>
+        {/* イラスト画像のビューポート（中央揃え・3000px） */}
+        <div className="conveyor-image-viewport">
+          <img
+            src="/ごみデータ/ベルトコンベア.png"
+            alt="ベルトコンベア"
+            className="conveyor-illustration"
+          />
         </div>
 
-        {/* 下部レール枠 */}
-        <div className="conveyor-rail conveyor-rail-bottom" />
+        {/* ベルト面上のアイテム描画領域 */}
+        <div className="conveyor-items-plane">
+          {conveyItems.map((conveyItem: ConveyItem) => {
+            const elapsedMs = Date.now() - conveyItem.startedAt;
+            const progress = Math.min(1, elapsedMs / conveyItem.travelMs);
+            const distanceX = conveyItem.toX - conveyItem.coordinateX;
+            const currentX = conveyItem.coordinateX + distanceX * progress;
+
+            return (
+              <GamePlayWaste
+                key={conveyItem.id}
+                id={conveyItem.id}
+                label={conveyItem.def.label}
+                isSimple={conveyItem.def.isSimple}
+                parts={conveyItem.def.parts}
+                baseX={currentX}
+                baseY={conveyItem.coordinateY}
+                setScore={setScore}
+              />
+            );
+          })}
+        </div>
       </div>
     </div>
   );

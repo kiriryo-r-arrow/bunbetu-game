@@ -71,7 +71,7 @@ export const Waste: WasteDef[] = [
   },
   { //キャップ
     key: 'cap', //key
-    label: 'キャップ', //ごみ名
+    label: 'ごみデータ/キャップ.png', //ごみ名
     img: 'ここに挿入', //アイコン画像
     score: 10, //獲得点数
     isSimple: true, //分解できるか
@@ -85,26 +85,13 @@ export const Waste: WasteDef[] = [
   { //ラベル
     key: 'label', //key
     label: 'ラベル', //ごみ名
-    img: 'ここに挿入', //アイコン画像
+    img: 'ごみデータ/ラベル.png', //アイコン画像
     score: 10, //獲得点数
     isSimple: true, //分解できるか
     isWash: false, //洗える・流せるか
     isBurn: false, //発火の危険性があるか
     bin: "recycle_plastic", //ごみ箱・分解可能ならそちらを優先して処理
     parts: [],
-    feedBackId: 'simple_mistake',
-    wasteLevel: 1,
-  },
-  {
-    key: 'can_juice',
-    img: 'ここに挿入',
-    score: 20,
-    isSimple: true,
-    parts: [],
-    label: '空き缶',
-    isWash: false,
-    isBurn: false,
-    bin: 'sigen',
     feedBackId: 'simple_mistake',
     wasteLevel: 1,
   },

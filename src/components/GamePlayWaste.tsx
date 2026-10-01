@@ -36,7 +36,7 @@ const DraggableItem = ({ id, children, baseX, baseY }: DraggableItemProps) => {
     transform: transform
       ? `translate3d(${transform.x}px, calc(-50% + ${transform.y}px), 0)`
       : 'translateY(-50%)',
-    zIndex: isDragging ? 100 : 10,
+    zIndex: isDragging ? 1000 : 10,
   };
 
   return (
