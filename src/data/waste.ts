@@ -71,8 +71,8 @@ export const Waste: WasteDef[] = [
   },
   { //キャップ
     key: 'cap', //key
-    label: 'ごみデータ/キャップ.png', //ごみ名
-    img: 'ここに挿入', //アイコン画像
+    label: 'キャップ', //ごみ名
+    img: 'ごみデータ/キャップ.png', //アイコン画像
     score: 10, //獲得点数
     isSimple: true, //分解できるか
     isWash: false, //洗える・流せるか

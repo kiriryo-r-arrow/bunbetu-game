@@ -11,6 +11,7 @@ import { Waste } from "../data/waste";
 import type { BackgroundType, BinDef, ConveyItem, FeedBack, GameLevelParameter, GameStatus, WasteDef } from "../types/game";
 
 import { SPECIAL_FEEDBACK_MESSAGES, type SpecialFeedbackMessage } from "../data/feedback";
+import { useGameSound } from "../contexts/SoundContext";
 
 import './GamePlay.css';
 
@@ -32,6 +33,7 @@ const getRandomNumber = (min: number, max: number): number => {
 const GamePlayContent = (props: GamePlayProps) => {
   const { gameProgress, setFeedBackItem, setHealth, setScore, gameLevel } = props;
   const { conveyItems, setConveyItems } = useConveyItems();
+  const { playSE } = useGameSound();
   const [activeOver, setActiveOver] = useState<UniqueIdentifier | null>(null); // 現在ドラッグ中で重なっている領域をハイライトするために管理
 
   // ゲーム終了時またはスタート画面への遷移時に conveyItems をリセット
@@ -94,8 +96,10 @@ const GamePlayContent = (props: GamePlayProps) => {
     if (activeItem.def.bin === over.id) {
       setScore((prevScore: number) => prevScore + activeItem.def.score);
       setConveyItems((prevItems: ConveyItem[]) => prevItems.filter((item: ConveyItem) => item.id !== active.id));
+      playSE('correct');
     } else {
       setHealth((prevHealth: number) => Math.max(0, prevHealth - 1));
+      playSE('incorrect');
 
       const feedBackId = activeItem.def.feedBackId ?? 'simple_mistake';
       const binInfo = BINS.find((b: BinDef) => b.id === activeItem.def.bin);
