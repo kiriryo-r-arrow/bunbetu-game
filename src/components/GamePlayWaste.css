@@ -4,19 +4,22 @@
   align-items: center;
   justify-content: center;
   user-select: none;
+  -webkit-user-select: none;
   cursor: grab;
   touch-action: none;
 }
 
+.draggable-waste-container:active {
+  cursor: grabbing;
+}
+
 .waste-image {
-  max-width: 150px;
-  max-height: 150px;
+  max-width: var(--waste-size);
+  max-height: var(--waste-size);
   object-fit: contain;
   pointer-events: none;
   display: block;
 }
-
-
 
 .waste-parts-container {
   display: flex;
@@ -27,14 +30,27 @@
   cursor: pointer;
   padding: 4px;
   border-radius: 8px;
+  touch-action: none;
 }
 
+/* 分解パーツの画像は本体より一回り小さく */
+.waste-part-image {
+  width: var(--waste-part-size);
+  height: var(--waste-part-size);
+  max-width: var(--waste-part-size);
+  max-height: var(--waste-part-size);
+}
 
 .waste-emoji {
-  font-size: 42px;
+  font-size: calc(var(--waste-size) * 0.28);
   line-height: 1;
 }
 
-
-
-
+.waste-label-tag {
+  font-size: clamp(11px, 2.6vw, 15px);
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}

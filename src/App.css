@@ -1,4 +1,23 @@
-.app-content{
-    height: 100vh;
-    overflow: hidden;
+#root {
+  width: 100%;
+  max-width: 1126px;
+  margin: 0 auto;
+  text-align: center;
+  min-height: var(--app-h);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* PC 幅でのみ左右の境界線を見せる（モバイルでは幅を 1px でも無駄にしない） */
+@media (min-width: 1127px) {
+  #root {
+    border-inline: 1px solid var(--border);
+  }
+}
+
+.app-content {
+  height: var(--app-h);
+  overflow: hidden;
 }

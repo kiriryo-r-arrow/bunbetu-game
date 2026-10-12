@@ -59,14 +59,16 @@ export type GameStatus = 'start' | 'playing' | 'end';
 export type BackgroundType = 'beautiful' | 'fewbeauty' | 'normal' | 'fewpollution' | 'pollution';
 
 // ベルト上を流れているゴミ1つ分の実体。
+//
+// 位置は固定 px ではなく「進行度(0〜1)」で表現する。
+// 進行度は経過時間 / travelMs のみで決まるため、画面幅・端末の回転に依存しない。
+// 実際の描画位置は GamePlayWaste が % 指定で計算する。
 export interface ConveyItem {
   id: number;
   def: WasteDef;
-  coordinateX: number; // 出現位置(px)
-  coordinateY: number; // 出現位置(px)
-  toX: number; // ミスライン位置(px)
-  travelMs: number; // 流れ切るまでの時間
-  startedAt: number; // 移動開始時刻
+  laneOffset: number; // ベルト面高さに対する縦方向オフセット(%)。0 が中央。
+  travelMs: number; // 右端外→左端外を流れ切るまでの時間(ms)。画面幅に依存しない。
+  startedAt: number; // 移動開始時刻(ms)
 }
 
 export interface GameLevelParameter {

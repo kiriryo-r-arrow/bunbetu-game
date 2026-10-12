@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import GamePlayBin from "./GamePlayBin";
 import GamePlaySink from "./GamePlaySink";
-import { DndContext, rectIntersection, useSensor, useSensors, PointerSensor, type DragOverEvent, type DragEndEvent, type UniqueIdentifier } from "@dnd-kit/core";
+import { DndContext, rectIntersection, useSensor, useSensors, MouseSensor, TouchSensor, type DragOverEvent, type DragEndEvent, type UniqueIdentifier } from "@dnd-kit/core";
 import { BINS } from "../data/bins";
 import { GAME_LEVEL_PARAMETER_DATA } from "../data/difficulty";
+import { BASE_TRAVEL_MS } from "../data/layout";
 import GamePlayConveyor from "./GamePlayConveyor";
 import { useConveyItems, ConveyItemsProvider } from "../contexts/ConveyItems";
 
@@ -43,10 +44,21 @@ const GamePlayContent = (props: GamePlayProps) => {
     }
   }, [gameProgress, setConveyItems]);
 
+  /*
+   * PointerSensor 単独だと iOS Safari でドラッグ開始を取りこぼすことがあるため、
+   * MouseSensor と TouchSensor を併用する。
+   * どちらも距離しきい値のみで発火させ（遅延は入れない）、
+   * テンポの速いゲーム操作を阻害しないようにする。
+   */
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: {
         distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        distance: 5,
       },
     })
   );
@@ -139,16 +151,15 @@ const GamePlayContent = (props: GamePlayProps) => {
 
     const intervalId = setInterval(() => {
       const itemId = Date.now() + Math.random();
-      const itemY = 0;
       const index = getRandomNumber(0, wasteList.length - 1);
-      const travelMs = Math.round(10000 / currentParam.wasteSpeed);
+      // 「ベルト右端の外側 → 左端の外側」を流れ切るまでの時間。
+      // 位置は割合で持つので、この値がそのまま画面上の滞在時間になる（画面幅に非依存）。
+      const travelMs = Math.round(BASE_TRAVEL_MS / currentParam.wasteSpeed);
 
       const newItem: ConveyItem = {
         id: itemId, // 重複を避けるために一意のIDを生成
         def: wasteList[index],
-        coordinateX: 980,
-        coordinateY: itemY,
-        toX: -100,
+        laneOffset: 0,
         travelMs: travelMs, // スピードに応じた移動ミリ秒
         startedAt: Date.now(),
       };
@@ -166,6 +177,7 @@ const GamePlayContent = (props: GamePlayProps) => {
       <DndContext
         sensors={sensors}
         collisionDetection={rectIntersection}
+        autoScroll={false}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
@@ -206,4 +218,4 @@ const GamePlay = (props: GamePlayProps) => {
   );
 };
 
-export default GamePlay;
+export default GamePlay;

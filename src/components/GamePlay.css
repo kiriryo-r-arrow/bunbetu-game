@@ -5,6 +5,7 @@
   align-items: center;
   flex: 1;
   width: 100%;
+  min-height: 0;
   padding: 0;
   box-sizing: border-box;
   position: relative;
@@ -18,6 +19,7 @@
   align-items: center;
   justify-content: flex-end;
   flex: 1;
+  min-height: 0;
 }
 
 .conveyor-section {
@@ -33,17 +35,25 @@
   width: 100%;
   display: flex;
   justify-content: flex-end;
-  padding: 0 32px 10px 0;
+  /* 右端の余白はセーフエリア（横向き時のノッチ）を考慮 */
+  padding: 0 calc(32px + var(--safe-r)) 10px 0;
   box-sizing: border-box;
   position: relative;
   z-index: 10;
-  top:60px;
+  /* コンベアに少し重ねる。固定 60px ではなくコンベア高さに対する比率で。 */
+  top: calc(var(--conveyor-h) * 0.3);
+}
+
+@media (max-width: 899px) {
+  .sink-wrapper {
+    padding-right: calc(12px + var(--safe-r));
+  }
 }
 
 .bottom-bins-bar {
   width: 100%;
   background-color: #87a55c;
-  padding: 10px 16px 14px 16px;
+  padding: 10px calc(16px + var(--safe-r)) calc(14px + var(--safe-b)) calc(16px + var(--safe-l));
   box-sizing: border-box;
   display: flex;
   justify-content: center;
@@ -53,3 +63,8 @@
   z-index: 10;
 }
 
+@media (max-width: 899px) {
+  .bottom-bins-bar {
+    padding: 8px calc(8px + var(--safe-r)) calc(10px + var(--safe-b)) calc(8px + var(--safe-l));
+  }
+}

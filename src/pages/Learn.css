@@ -1,0 +1,63 @@
+.learnContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  min-height: var(--app-h);
+  max-height: var(--app-h);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: calc(24px + var(--safe-t)) calc(20px + var(--safe-r)) calc(24px + var(--safe-b)) calc(20px + var(--safe-l));
+  box-sizing: border-box;
+  text-align: center;
+  font-family: 'Hiragino Maru Gothic ProN', 'Zen Maru Gothic', sans-serif;
+}
+
+.learnTitle {
+  margin: 0;
+  font-size: clamp(1.4rem, 6vw, 2.4rem);
+  color: #166534;
+}
+
+.learnActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.learnButton {
+  border: none;
+  border-radius: 9999px;
+  padding: 14px 24px;
+  min-height: 52px;
+  font-size: clamp(1rem, 4vw, 1.2rem);
+  font-weight: bold;
+  color: #ffffff;
+  background: #22c55e;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.learnButton.isSecondary {
+  background: #ffffff;
+  color: #22c55e;
+  border: 3px solid #22c55e;
+}
+
+.learnButton:active {
+  transform: scale(0.97);
+}
+
+@media (min-width: 600px) {
+  .learnActions {
+    flex-direction: row;
+    max-width: 480px;
+  }
+
+  .learnButton {
+    flex: 1;
+  }
+}

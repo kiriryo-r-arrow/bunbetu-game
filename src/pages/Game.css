@@ -1,8 +1,8 @@
 .game-page {
   position: relative;
   width: 100%;
-  height: 100vh;
-  max-height: 100vh;
+  height: var(--app-h);
+  max-height: var(--app-h);
   margin: 0 auto;
   overflow: hidden;
   display: flex;

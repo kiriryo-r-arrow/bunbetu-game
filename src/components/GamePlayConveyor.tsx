@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import GamePlayWaste from "./GamePlayWaste";
 import { useConveyItems } from "../contexts/ConveyItems";
+import { getProgress, isExpired } from "../data/layout";
 import type { ConveyItem } from "../types/game";
 import "./GamePlayConveyor.css";
 
@@ -25,8 +26,9 @@ const GamePlayConveyor = ({ setHealth, setScore }: GamePlayConveyorProps) => {
   }, []);
 
   useEffect(() => {
+    const now = Date.now();
     const expiredItemIds = conveyItems
-      .filter((item: ConveyItem) => Date.now() - item.startedAt >= item.travelMs)
+      .filter((item: ConveyItem) => isExpired(item, now))
       .map((item: ConveyItem) => item.id);
 
     if (expiredItemIds.length > 0) {
@@ -38,7 +40,7 @@ const GamePlayConveyor = ({ setHealth, setScore }: GamePlayConveyorProps) => {
   return (
     <div className="conveyor-wrapper">
       <div className="conveyor-assembly">
-        {/* イラスト画像のビューポート（中央揃え・3000px） */}
+        {/* イラスト画像のビューポート（中央揃え・--conveyor-h に合わせて縮尺） */}
         <div className="conveyor-image-viewport">
           <img
             src="/ごみデータ/ベルトコンベア.png"
@@ -49,25 +51,18 @@ const GamePlayConveyor = ({ setHealth, setScore }: GamePlayConveyorProps) => {
 
         {/* ベルト面上のアイテム描画領域 */}
         <div className="conveyor-items-plane">
-          {conveyItems.map((conveyItem: ConveyItem) => {
-            const elapsedMs = Date.now() - conveyItem.startedAt;
-            const progress = Math.min(1, elapsedMs / conveyItem.travelMs);
-            const distanceX = conveyItem.toX - conveyItem.coordinateX;
-            const currentX = conveyItem.coordinateX + distanceX * progress;
-
-            return (
-              <GamePlayWaste
-                key={conveyItem.id}
-                id={conveyItem.id}
-                label={conveyItem.def.label}
-                isSimple={conveyItem.def.isSimple}
-                parts={conveyItem.def.parts}
-                baseX={currentX}
-                baseY={conveyItem.coordinateY}
-                setScore={setScore}
-              />
-            );
-          })}
+          {conveyItems.map((conveyItem: ConveyItem) => (
+            <GamePlayWaste
+              key={conveyItem.id}
+              id={conveyItem.id}
+              label={conveyItem.def.label}
+              isSimple={conveyItem.def.isSimple}
+              parts={conveyItem.def.parts}
+              progress={getProgress(conveyItem)}
+              laneOffset={conveyItem.laneOffset}
+              setScore={setScore}
+            />
+          ))}
         </div>
       </div>
     </div>

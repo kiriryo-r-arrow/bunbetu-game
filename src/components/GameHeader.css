@@ -3,8 +3,9 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 16px 24px;
+  padding: calc(12px + var(--safe-t)) calc(24px + var(--safe-r)) 12px calc(24px + var(--safe-l));
   box-sizing: border-box;
+  gap: 8px;
   z-index: 100;
   position: relative;
 }
@@ -41,11 +42,12 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-radius: 9999px;
-  padding: 8px 18px;
+  padding: var(--hud-pad-y) var(--hud-pad-x);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.85);
   font-family: inherit;
-  font-size: 14.5px;
+  font-size: var(--hud-font);
+  white-space: nowrap;
   font-weight: 700;
   color: #1e293b;
   user-select: none;
@@ -54,7 +56,7 @@
 /* スコア＋残り時間統合カプセル */
 .score-time-badge {
   gap: 12px;
-  padding: 8px 16px;
+  padding: var(--hud-pad-y) var(--hud-pad-x);
 }
 
 .hud-badge-section {
@@ -95,7 +97,7 @@
 
 /* ヘルス（ハート）バッジ */
 .health-badge {
-  padding: 8px 16px;
+  padding: var(--hud-pad-y) var(--hud-pad-x);
 }
 
 .hearts-container {
@@ -139,4 +141,71 @@
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
+}
+
+
+/* =========================================================================
+   狭幅対応
+   .game-header-center の position: absolute を解除し、3 カラムの flex にする。
+   絶対配置のままだと難易度バッジが左右のバッジと重なってしまうため。
+   ========================================================================= */
+@media (max-width: 899px) {
+  .game-header {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .game-header-left,
+  .game-header-right {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .game-header-center {
+    position: static;
+    left: auto;
+    transform: none;
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .score-time-badge {
+    gap: 8px;
+  }
+
+  .badge-label {
+    font-size: calc(var(--hud-font) - 1px);
+  }
+
+  .badge-value {
+    font-size: var(--hud-font);
+  }
+
+  .hearts-container {
+    gap: 3px;
+  }
+
+  .heart-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .game-exit-btn {
+    margin-left: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
+
+/* 最も狭い端末（〜480px）では難易度バッジを畳む。
+   難易度はスタートオーバーレイで提示済みで、プレイ中の必須情報ではないため。 */
+@media (max-width: 480px) {
+  .game-header {
+    padding-left: calc(8px + var(--safe-l));
+    padding-right: calc(8px + var(--safe-r));
+  }
+
+  .game-header-center {
+    display: none;
+  }
 }

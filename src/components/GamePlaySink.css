@@ -1,17 +1,31 @@
 .game-play-sink {
-  width: 180px;
-  height: 144px;
+  width: var(--sink-w);
+  height: var(--sink-h);
   display: flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, filter 0.2s ease;
   cursor: pointer;
+  position: relative;
+}
+
+/* 当たり判定の拡張（ドロップの取りこぼし防止） */
+.game-play-sink::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 16px;
 }
 
 .game-play-sink.is-over {
   filter: drop-shadow(0 0 16px rgba(49, 176, 213, 0.8));
-  transform: scale(1.05);
+  transform: scale(1.08);
+}
+
+.game-play-sink.is-over::before {
+  background: rgba(49, 176, 213, 0.15);
+  outline: 3px solid #31b0d5;
 }
 
 .game-play-sink-image {

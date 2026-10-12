@@ -1,7 +1,9 @@
-/* 下部ごみ箱トレイ（白の角丸トレイ） */
+/* 下部ごみ箱トレイ（白の角丸トレイ）
+   PC ではごみ箱の数だけ横幅を取る（従来どおり中央に寄せる）。
+   モバイルは下のメディアクエリで全幅に広げ、4 列 x 2 段を敷き詰める。 */
 .bins-container {
   width: fit-content;
-  max-width: 98%;
+  max-width: 100%;
   margin: 0 auto;
   padding: 6px 12px;
   background: rgba(255, 255, 255, 0.96);
@@ -10,11 +12,13 @@
   box-sizing: border-box;
 }
 
+/* --bin-cols 列のグリッド。モバイル(4列)では自動的に 2 段組みになる。 */
 .bins-grid {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(var(--bin-cols), 1fr);
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  justify-items: center;
+  gap: var(--bin-gap);
   width: 100%;
 }
 
@@ -27,19 +31,36 @@
   border-radius: 8px;
   box-sizing: border-box;
   user-select: none;
+  -webkit-user-select: none;
   position: relative;
   cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+/* 当たり判定の拡張。指は丸いので、見た目より一回り広く受ける。 */
+.bin-card::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--bin-gap) / -2) calc(var(--bin-gap) / -2);
+  border-radius: 12px;
 }
 
 .bin-card.is-over {
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+  transform: scale(1.08);
   z-index: 10;
+}
+
+/* モバイルでは指でごみ箱が隠れるため、縁取り＋拡大の二重表現にする */
+.bin-card.is-over::before {
+  background: rgba(56, 161, 105, 0.18);
+  outline: 3px solid #38a169;
+  outline-offset: -1px;
 }
 
 /* ゴミ箱画像コンテナ */
 .bin-image-wrapper {
-  width: 100px;
-  height: 100px;
+  width: var(--bin-size);
+  height: var(--bin-size);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -53,14 +74,10 @@
   pointer-events: none;
 }
 
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
-  .bin-image-wrapper {
-    width: 44px;
-    height: 44px;
-  }
-  .bins-grid {
-    gap: 4px;
+
+@media (max-width: 899px) {
+  .bins-container {
+    width: 100%;
+    padding: 6px 8px;
   }
 }
-

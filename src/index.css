@@ -1,17 +1,109 @@
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  overflow: hidden;
+/* =========================================================================
+   デザイントークン
+   レイアウト定数はここに集約し、メディアクエリでは「値だけ」を差し替える。
+   各コンポーネント CSS からは var() で参照するだけにしておくことで、
+   画面幅ごとの崩れの原因を 1 ファイルに閉じ込める。
+   ========================================================================= */
+:root {
+  /* --- ビューポート高さ ---------------------------------------------------
+     モバイルのアドレスバー出入りで跳ねないよう dvh を使う。
+     下の @supports で非対応ブラウザへフォールバックする。                     */
+  --app-h: 100vh;
+
+  /* --- コンベア -----------------------------------------------------------
+     原寸画像は 3000 x 640px。帯として見せる高さが 201px、
+     画像上部を 145px 分オフセットして使っている。
+     縮尺しても崩れないよう、すべて 201px に対する比率で保持する。            */
+  --conveyor-h: 201px;
+  --conveyor-img-ratio: 3.1841;      /*  640 / 201 */
+  --conveyor-offset-ratio: -0.7214;  /* -145 / 201 */
+  --belt-top-ratio: 23.38%;          /*   47 / 201 */
+  --belt-h-ratio: 55.72%;            /*  112 / 201 */
+
+  /* --- ごみ / ごみ箱 / 流し台 --------------------------------------------- */
+  --waste-size: 150px;
+  --waste-part-size: 100px;
+  --bin-size: 100px;
+  --bin-cols: 8;                     /* ごみ箱の列数。モバイルでは 4 = 2 段組み */
+  --bin-gap: 8px;
+  --sink-w: 180px;
+  --sink-h: 144px;
+
+  /* --- HUD ---------------------------------------------------------------- */
+  --hud-font: 14.5px;
+  --hud-pad-y: 8px;
+  --hud-pad-x: 18px;
+
+  /* --- セーフエリア（ノッチ / ホームインジケータ） ------------------------- */
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+}
+
+@supports (height: 100svh) {
+  :root { --app-h: 100svh; }
+}
+@supports (height: 100dvh) {
+  :root { --app-h: 100dvh; }
+}
+
+/* --- タブレット / 大型スマホ以下 ------------------------------------------ */
+@media (max-width: 899px) {
+  :root {
+    --conveyor-h: clamp(110px, 26vw, 170px);
+    --waste-size: clamp(64px, 17vw, 120px);
+    --waste-part-size: clamp(48px, 13vw, 90px);
+    --bin-size: clamp(56px, 18vw, 90px);
+    --bin-cols: 4;                   /* 4 列 x 2 段 */
+    --bin-gap: 6px;
+    --sink-w: clamp(90px, 24vw, 150px);
+    --sink-h: clamp(72px, 19vw, 120px);
+    --hud-font: 12.5px;
+    --hud-pad-y: 6px;
+    --hud-pad-x: 12px;
+  }
+}
+
+/* --- スマホ横向き（高さが取れない場合）------------------------------------
+     高さ方向が厳しいのでコンベアを抑え、ごみ箱は 1 段に戻す。                 */
+@media (orientation: landscape) and (max-height: 540px) {
+  :root {
+    --conveyor-h: clamp(84px, 22vh, 140px);
+    --waste-size: clamp(52px, 13vh, 110px);
+    --waste-part-size: clamp(40px, 10vh, 80px);
+    --bin-size: clamp(48px, 12vh, 80px);
+    --bin-cols: 8;
+    --sink-w: clamp(76px, 18vh, 140px);
+    --sink-h: clamp(60px, 15vh, 112px);
+  }
+}
+
+/* =========================================================================
+   グローバル
+   ========================================================================= */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  /* 引っ張って更新 / 画面端のバウンスを抑止（ドラッグ操作の暴発防止） */
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
-  margin: 0;
+  overflow: hidden;
 }
 
+/* 画像のはみ出し防止（コンベア原寸画像は個別に max-width: none で打ち消す） */
+img {
+  max-width: 100%;
+}
+
+button {
+  font-family: inherit;
+  /* iOS のダブルタップ拡大を防ぐ */
+  touch-action: manipulation;
+}

@@ -9,48 +9,55 @@
   z-index: 20;
 }
 
-/* コンベア本体アセンブリ: 最大高さを201pxに固定 */
+/* コンベア本体アセンブリ: 高さは --conveyor-h（画面幅に応じて縮尺） */
 .conveyor-assembly {
   position: relative;
   width: 100%;
-  height: 201px;
-  max-height: 201px;
+  height: var(--conveyor-h);
+  max-height: var(--conveyor-h);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* 3000pxイラスト画像のビューポート（画面中央揃え） */
+/* イラスト画像のビューポート（画面幅いっぱい・画像は中央揃えでクリップ）
+   縮尺すると画像の実幅も縮むため、固定幅のビューポートに左寄せで置くと
+   画面右側に継ぎ目ができる。flex で中央寄せして確実に覆う。            */
 .conveyor-image-viewport {
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 3000px;
-  height: 201px;
+  left: 0;
+  right: 0;
+  height: var(--conveyor-h);
   overflow: hidden;
+  display: flex;
+  justify-content: center;
   pointer-events: none;
   z-index: 1;
 }
 
-/* ベルトコンベアイラスト（原寸比率維持・上部余白145pxをオフセット） */
+/* ベルトコンベアイラスト（原寸 3000x640 の比率を保ったまま --conveyor-h に追従）
+   原寸時: height 640px / margin-top -145px / 帯の高さ 201px             */
 .conveyor-illustration {
-  width: 3000px;
-  height: 640px;
+  height: calc(var(--conveyor-h) * var(--conveyor-img-ratio));
+  width: auto;
   max-width: none;
-  margin-top: -145px;
+  flex: none;
+  margin-top: calc(var(--conveyor-h) * var(--conveyor-offset-ratio));
   display: block;
   user-select: none;
+  -webkit-user-select: none;
   pointer-events: none;
 }
 
-/* ベルト面上のアイテム描画領域（上部レール47pxの下、ベルト面112pxに配置） */
+/* ベルト面上のアイテム描画領域（上部レールの下、ベルト面に配置）
+   原寸の top:47px / height:112px を 201px に対する % へ置換          */
 .conveyor-items-plane {
   position: absolute;
   left: 0;
   right: 0;
-  top: 47px;
-  height: 112px;
+  top: var(--belt-top-ratio);
+  height: var(--belt-h-ratio);
   pointer-events: auto;
   z-index: 10;
 }

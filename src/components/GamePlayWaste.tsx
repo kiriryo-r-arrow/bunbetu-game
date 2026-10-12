@@ -1,41 +1,64 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useDraggable, type UniqueIdentifier } from '@dnd-kit/core';
 import { Waste } from '../data/waste';
 import { useConveyItems } from '../contexts/ConveyItems';
+import { LANE_OFFSET_STEP } from '../data/layout';
 import type { ConveyItem, WasteDef } from '../types/game';
 import './GamePlayWaste.css';
+
+/** タップとドラッグを判別する移動量のしきい値(px) */
+const TAP_SLOP_PX = 8;
 
 interface DraggableItemProps {
   id: UniqueIdentifier;
   children: ReactNode;
-  baseX: number;
-  baseY: number;
+  /** 0 = ベルト右端の外側 / 1 = ベルト左端の外側 */
+  progress: number;
+  /** ベルト面高さに対する縦方向オフセット(%) */
+  laneOffset: number;
 }
 
 // 1．ドラッグできるコンポーネント
-const DraggableItem = ({ id, children, baseX, baseY }: DraggableItemProps) => {
+const DraggableItem = ({ id, children, progress, laneOffset }: DraggableItemProps) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: id,
   });
-  const [fixedDragBaseX, setFixedDragBaseX] = useState<number | null>(null);
+  // ドラッグ中はベルトの進行を止めて見せる（指から位置が逃げないように）
+  const [frozenProgress, setFrozenProgress] = useState<number | null>(null);
 
   useEffect(() => {
-    if (isDragging && fixedDragBaseX === null) {
-      setFixedDragBaseX(baseX);
-    } else if (!isDragging && fixedDragBaseX !== null) {
-      setFixedDragBaseX(null);
+    if (isDragging && frozenProgress === null) {
+      setFrozenProgress(progress);
+    } else if (!isDragging && frozenProgress !== null) {
+      setFrozenProgress(null);
     }
-  }, [isDragging, fixedDragBaseX, baseX]);
+  }, [isDragging, frozenProgress, progress]);
 
-  const currentLeft = isDragging && fixedDragBaseX !== null ? fixedDragBaseX : baseX;
+  const p = isDragging && frozenProgress !== null ? frozenProgress : progress;
+
+  /*
+   * 割合ベースの座標計算。
+   *   left        : 親(ベルト面)の幅に対する %
+   *   translateX  : 自分自身の幅に対する %
+   * この 2 つを組み合わせることで、
+   *   p = 0 … 要素の左端がベルトの右端に一致（完全に画面外）
+   *   p = 1 … 要素の右端がベルトの左端に一致（完全に画面外）
+   * となり、画面幅が何 px でも必ず「右端外 → 左端外」を完走する。
+   * JS 側で画面幅を測る必要がないため、リサイズ・端末回転にも自動追従する。
+   */
+  const leftPercent = (1 - p) * 100;
+  const selfShiftPercent = -p * 100;
+
+  const translateX = transform
+    ? `calc(${selfShiftPercent}% + ${transform.x}px)`
+    : `${selfShiftPercent}%`;
+  const translateY = transform ? `calc(-50% + ${transform.y}px)` : '-50%';
 
   const style: React.CSSProperties = {
     position: 'absolute',
-    left: `${currentLeft}px`,
-    top: `calc(50% + ${baseY}px)`,
-    transform: transform
-      ? `translate3d(${transform.x}px, calc(-50% + ${transform.y}px), 0)`
-      : 'translateY(-50%)',
+    left: `${leftPercent}%`,
+    top: `${50 + laneOffset}%`,
+    transform: `translate3d(${translateX}, ${translateY}, 0)`,
     zIndex: isDragging ? 1000 : 10,
   };
 
@@ -51,15 +74,17 @@ interface GamePlayWasteProps {
   label: string;
   parts: string[];
   isSimple: boolean;
-  baseX: number;
-  baseY: number;
+  progress: number;
+  laneOffset: number;
   setScore: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const GamePlayWaste = ({ id, label, parts, isSimple, baseX, baseY, setScore }: GamePlayWasteProps) => {
+const GamePlayWaste = ({ id, label, parts, isSimple, progress, laneOffset, setScore }: GamePlayWasteProps) => {
   const { conveyItems, setConveyItems } = useConveyItems();
   const currentItem = conveyItems.find((item: ConveyItem) => item.id === id);
   const wasteDef = currentItem?.def;
+  // タップ開始位置。ドラッグとの競合を避けるため、移動量が小さいときだけ分解とみなす。
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const handleSeparate = (partKey: string) => {
     if (isSimple) {
@@ -75,22 +100,19 @@ const GamePlayWaste = ({ id, label, parts, isSimple, baseX, baseY, setScore }: G
       return;
     }
 
-    const elapsedMs = Date.now() - currentItem.startedAt;
-    const progress = Math.min(1, elapsedMs / currentItem.travelMs);
-    const currentX = currentItem.coordinateX + (currentItem.toX - currentItem.coordinateX) * progress;
-    const remainingTravelMs = Math.max(0, currentItem.travelMs - elapsedMs);
-
     setScore((prevScore: number) => prevScore + currentItem.def.score);
 
+    /*
+     * 分解後の 2 片は、親の startedAt / travelMs をそのまま引き継ぐ。
+     * 進行度は時間だけで決まるので、これだけで分解地点から途切れずに流れ続ける。
+     */
     const separatedItems: ConveyItem[] = [
       {
         id: Date.now() + Math.random(),
         def: selectedPartDef,
-        coordinateX: currentX,
-        coordinateY: currentItem.coordinateY - 12,
-        toX: currentItem.toX,
-        travelMs: remainingTravelMs,
-        startedAt: Date.now(),
+        laneOffset: currentItem.laneOffset - LANE_OFFSET_STEP,
+        travelMs: currentItem.travelMs,
+        startedAt: currentItem.startedAt,
       },
     ];
 
@@ -105,11 +127,9 @@ const GamePlayWaste = ({ id, label, parts, isSimple, baseX, baseY, setScore }: G
         separatedItems.push({
           id: Date.now() + Math.random(),
           def: remainingDef,
-          coordinateX: currentX,
-          coordinateY: currentItem.coordinateY + 12,
-          toX: currentItem.toX,
-          travelMs: remainingTravelMs,
-          startedAt: Date.now(),
+          laneOffset: currentItem.laneOffset + LANE_OFFSET_STEP,
+          travelMs: currentItem.travelMs,
+          startedAt: currentItem.startedAt,
         });
       }
     }
@@ -117,6 +137,28 @@ const GamePlayWaste = ({ id, label, parts, isSimple, baseX, baseY, setScore }: G
     setConveyItems((prevItems: ConveyItem[]) =>
       prevItems.filter((item: ConveyItem) => item.id !== currentItem.id).concat(separatedItems)
     );
+  };
+
+  const handlePartPointerDown = (event: React.PointerEvent) => {
+    pointerStartRef.current = { x: event.clientX, y: event.clientY };
+  };
+
+  const handlePartPointerUp = (event: React.PointerEvent, partKey: string) => {
+    const start = pointerStartRef.current;
+    pointerStartRef.current = null;
+    if (!start) {
+      return;
+    }
+
+    // 指が動いていればドラッグ操作とみなし、分解しない
+    const movedX = Math.abs(event.clientX - start.x);
+    const movedY = Math.abs(event.clientY - start.y);
+    if (movedX > TAP_SLOP_PX || movedY > TAP_SLOP_PX) {
+      return;
+    }
+
+    event.stopPropagation();
+    handleSeparate(partKey);
   };
 
   const renderVisual = () => {
@@ -144,7 +186,7 @@ const GamePlayWaste = ({ id, label, parts, isSimple, baseX, baseY, setScore }: G
   };
 
   return (
-    <DraggableItem id={id} baseX={baseX} baseY={baseY}>
+    <DraggableItem id={id} progress={progress} laneOffset={laneOffset}>
       {isSimple ? (
         renderVisual()
       ) : (
@@ -157,13 +199,11 @@ const GamePlayWaste = ({ id, label, parts, isSimple, baseX, baseY, setScore }: G
               <div
                 key={`${partKey}-${index}`}
                 className="waste-part-chip"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  handleSeparate(partKey);
-                }}
+                onPointerDown={handlePartPointerDown}
+                onPointerUp={(event) => handlePartPointerUp(event, partKey)}
               >
                 {isImg ? (
-                  <img src={`/${matchedWaste.img}`} alt={matchedWaste.label} className="waste-image" style={{ width: 100, height: 100 }} />
+                  <img src={`/${matchedWaste.img}`} alt={matchedWaste.label} className="waste-image waste-part-image" />
                 ) : (
                   <span>{matchedWaste?.img && matchedWaste.img !== 'ここに挿入' ? matchedWaste.img : matchedWaste?.label ?? partKey}</span>
                 )}

@@ -1,8 +1,10 @@
 .game-start-overlay {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: var(--app-h);
+  padding: calc(12px + var(--safe-t)) calc(12px + var(--safe-r)) calc(12px + var(--safe-b)) calc(12px + var(--safe-l));
+  box-sizing: border-box;
   background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -23,8 +25,13 @@
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  width: 90%;
+  width: 100%;
   max-width: 600px;
+  max-height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
   position: relative;
 }
 
@@ -97,7 +104,8 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  min-height: 240px;
+  min-height: clamp(120px, 26vh, 240px);
+  box-sizing: border-box;
 }
 
 .slider-image-placeholder {
@@ -172,3 +180,55 @@
   cursor: pointer;
 }
 
+
+
+/* =========================================================================
+   モバイル対応
+   ========================================================================= */
+@media (max-width: 599px), (orientation: landscape) and (max-height: 540px) {
+  .start-modal {
+    border-radius: 24px;
+    padding: 16px 16px 20px;
+    gap: 10px;
+  }
+
+  /* 「難易度を選びなおす」が絶対配置のままだとタイトルに重なるので通常フローへ */
+  .reselect-difficulty-btn {
+    position: static;
+    align-self: flex-end;
+    padding: 8px 14px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+
+  .start-modal-title {
+    font-size: clamp(20px, 5.5vw, 28px);
+  }
+
+  .start-difficulty-badge {
+    font-size: 14px;
+    padding: 5px 16px;
+  }
+
+  .start-slider-container {
+    gap: 8px;
+  }
+
+  .slider-arrow {
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    font-size: 20px;
+  }
+
+  .slider-card-title {
+    font-size: clamp(15px, 4vw, 20px);
+  }
+
+  .start-action-button {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: clamp(18px, 5vw, 24px);
+    min-height: 56px;
+  }
+}

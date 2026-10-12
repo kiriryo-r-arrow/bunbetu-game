@@ -1,8 +1,10 @@
 .gameEndOverlay {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: var(--app-h);
+  padding: calc(12px + var(--safe-t)) calc(12px + var(--safe-r)) calc(12px + var(--safe-b)) calc(12px + var(--safe-l));
+  box-sizing: border-box;
   background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -23,8 +25,12 @@
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  width: 90%;
+  width: 100%;
   max-width: 600px;
+  max-height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   position: relative;
   text-align: center;
   box-sizing: border-box;
@@ -193,4 +199,56 @@
   font-size: 24px;
   font-weight: bold;
   color: #94a3b8;
+}
+
+
+/* =========================================================================
+   モバイル対応
+   ========================================================================= */
+@media (max-width: 599px) {
+  .gameEndOverlayCard {
+    border-radius: 24px;
+    padding: 18px 16px;
+    gap: 14px;
+  }
+
+  /* 2 つのボタンを横に並べると文字が潰れるので縦積みに */
+  .gameEndOverlayFooter {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .gameEndOverlayLearnButton,
+  .gameEndOverlayNextButton {
+    width: 100%;
+    padding: 14px 16px;
+    min-height: 52px;
+    font-size: 17px;
+  }
+
+  .feedbackImage {
+    width: clamp(56px, 18vw, 80px);
+    height: clamp(56px, 18vw, 80px);
+  }
+
+  .gameEndFeedbackImages {
+    gap: 10px;
+  }
+}
+
+/* スマホ横向きは高さが足りないので各要素を圧縮 */
+@media (orientation: landscape) and (max-height: 540px) {
+  .gameEndOverlayCard {
+    padding: 14px 18px;
+    gap: 10px;
+  }
+
+  .gameEndScoreValue {
+    font-size: clamp(32px, 9vh, 48px);
+  }
+
+  .feedbackImage {
+    width: 56px;
+    height: 56px;
+  }
 }
